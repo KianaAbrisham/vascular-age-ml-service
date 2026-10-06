@@ -28,3 +28,8 @@ models/*.joblib
 
 # Raw local datasets
 data/raw/
+
+# Python package build metadata
+*.egg-info/
+build/
+dist/
