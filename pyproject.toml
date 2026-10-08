@@ -7,11 +7,15 @@ name = "vascular-age-ml-service"
 version = "0.1.0"
 description = "An end-to-end machine learning service for vascular-age prediction."
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 [project.optional-dependencies]
 dev = [
     "pytest>=8",
+    "httpx",
 ]
