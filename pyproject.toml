@@ -9,6 +9,7 @@ description = "An end-to-end machine learning service for vascular-age predictio
 requires-python = ">=3.10"
 dependencies = [
     "fastapi",
+    "pydantic>=2",
     "uvicorn",
 ]
 

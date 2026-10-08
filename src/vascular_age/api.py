@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 
 from vascular_age.preprocessing import validate_age
+from vascular_age.schemas import AgeRequest, AgeResponse, HealthResponse
 
 
 app = FastAPI(
@@ -10,17 +10,13 @@ app = FastAPI(
 )
 
 
-class AgeRequest(BaseModel):
-    age: float
+@app.get("/health", response_model=HealthResponse)
+def health_check() -> HealthResponse:
+    return HealthResponse(status="healthy")
 
 
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
-
-
-@app.post("/validate-age")
-def validate_age_endpoint(request: AgeRequest):
+@app.post("/validate-age", response_model=AgeResponse)
+def validate_age_endpoint(request: AgeRequest) -> AgeResponse:
     try:
         validated_age = validate_age(request.age)
     except ValueError as exc:
@@ -29,7 +25,7 @@ def validate_age_endpoint(request: AgeRequest):
             detail=str(exc),
         ) from exc
 
-    return {
-        "age": validated_age,
-        "valid": True,
-    }
+    return AgeResponse(
+        age=validated_age,
+        valid=True,
+    )
