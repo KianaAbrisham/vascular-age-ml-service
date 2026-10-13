@@ -44,6 +44,7 @@ def test_validate_age_wrong_type():
 
     assert response.status_code == 422
 
+
 def test_predict_success(monkeypatch):
     def fake_predict_age_category(waveform):
         return {

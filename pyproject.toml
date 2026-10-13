@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vascular-age-ml-service"
 version = "0.1.0"
-description = "An end-to-end machine learning service for vascular-age prediction."
+description = "An end-to-end machine learning service for PPG-based age-category prediction."
 requires-python = ">=3.10"
 dependencies = [
     "fastapi",

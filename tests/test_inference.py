@@ -30,6 +30,7 @@ def fake_assets():
 
     return model, metadata
 
+
 def test_predict_age_category_success(monkeypatch):
     monkeypatch.setattr(
         inference,

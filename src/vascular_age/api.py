@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 
+from vascular_age.inference import predict_age_category
 from vascular_age.preprocessing import validate_age
 from vascular_age.schemas import (
     AgeRequest,
@@ -8,7 +9,6 @@ from vascular_age.schemas import (
     PredictionRequest,
     PredictionResponse,
 )
-from vascular_age.inference import predict_age_category
 
 app = FastAPI(
     title="Vascular Age ML Service",
@@ -35,6 +35,7 @@ def validate_age_endpoint(request: AgeRequest) -> AgeResponse:
         age=validated_age,
         valid=True,
     )
+
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest) -> PredictionResponse:

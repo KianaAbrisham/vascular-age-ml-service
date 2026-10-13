@@ -13,6 +13,7 @@ class AgeResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
 
+
 class PredictionRequest(BaseModel):
     waveform: list[float]
 
