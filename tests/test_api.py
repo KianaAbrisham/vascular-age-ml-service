@@ -43,3 +43,55 @@ def test_validate_age_wrong_type():
     )
 
     assert response.status_code == 422
+
+def test_predict_success(monkeypatch):
+    def fake_predict_age_category(waveform):
+        return {
+            "predicted_age_category": 35,
+            "scores": {
+                "25": 0.10,
+                "35": 0.50,
+                "45": 0.10,
+                "55": 0.10,
+                "65": 0.10,
+                "75": 0.10,
+            },
+            "model_status": "test_model",
+        }
+
+    monkeypatch.setattr(
+        "vascular_age.api.predict_age_category",
+        fake_predict_age_category,
+    )
+
+    response = client.post(
+        "/predict",
+        json={"waveform": [0.1] * 512},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["predicted_age_category"] == 35
+    assert response.json()["model_status"] == "test_model"
+
+
+def test_predict_invalid_length(monkeypatch):
+    def fake_predict_age_category(waveform):
+        raise ValueError(
+            "Waveform must contain exactly 512 samples."
+        )
+
+    monkeypatch.setattr(
+        "vascular_age.api.predict_age_category",
+        fake_predict_age_category,
+    )
+
+    response = client.post(
+        "/predict",
+        json={"waveform": [0.1] * 100},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == (
+        "Waveform must contain exactly 512 samples."
+    )
+

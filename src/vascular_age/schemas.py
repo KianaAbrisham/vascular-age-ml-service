@@ -12,3 +12,12 @@ class AgeResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
+
+class PredictionRequest(BaseModel):
+    waveform: list[float]
+
+
+class PredictionResponse(BaseModel):
+    predicted_age_category: int
+    scores: dict[str, float]
+    model_status: str
