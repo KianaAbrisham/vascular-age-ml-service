@@ -1,5 +1,7 @@
 ﻿# Vascular Age ML Service
 
+[![Tests](https://github.com/KianaAbrisham/vascular-age-ml-service/actions/workflows/tests.yml/badge.svg)](https://github.com/KianaAbrisham/vascular-age-ml-service/actions/workflows/tests.yml)
+
 A FastAPI-based machine learning service for serving age-category predictions from PPG waveforms.
 
 The project demonstrates an end-to-end ML serving workflow: request validation, preprocessing, saved-model loading, inference, structured API responses, and automated testing.
