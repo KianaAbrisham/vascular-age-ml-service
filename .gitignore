@@ -33,3 +33,5 @@ data/raw/
 *.egg-info/
 build/
 dist/
+
+.coverage
