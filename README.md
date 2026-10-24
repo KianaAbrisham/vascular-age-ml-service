@@ -1,10 +1,10 @@
-﻿# Vascular Age ML Service
+# Vascular Age ML Service
 
 [![Tests](https://github.com/KianaAbrisham/vascular-age-ml-service/actions/workflows/tests.yml/badge.svg)](https://github.com/KianaAbrisham/vascular-age-ml-service/actions/workflows/tests.yml)
 
 A FastAPI-based machine learning service for serving age-category predictions from PPG waveforms.
 
-The project demonstrates an end-to-end ML serving workflow: request validation, preprocessing, saved-model loading, inference, structured API responses, and automated testing.
+The project demonstrates an end-to-end ML serving workflow: request validation, preprocessing, saved-model loading, inference, structured API responses, automated testing, containerization, and CI-based runtime verification.
 
 ## Current Scope
 
@@ -24,6 +24,9 @@ The demo checkpoint used during development was trained on artificial data for s
 
 ```text
 vascular-age-ml-service/
+├── .github/
+│   └── workflows/
+│       └── tests.yml
 ├── src/
 │   └── vascular_age/
 │       ├── api.py
@@ -38,6 +41,8 @@ vascular-age-ml-service/
 ├── data/
 ├── models/
 ├── notebooks/
+├── .dockerignore
+├── Dockerfile
 ├── pyproject.toml
 └── README.md
 ```
@@ -120,6 +125,54 @@ Open the interactive FastAPI documentation at:
 http://127.0.0.1:8000/docs
 ```
 
+## Docker
+
+Build the Docker image:
+
+```powershell
+docker build -t vascular-age-ml-service:0.1.0 .
+```
+
+Run the service with a saved model directory mounted read-only into the container:
+
+```powershell
+docker run -d --rm --name vascular-age-api -p 8000:8000 `
+  --mount type=bind,source="C:\path\to\saved\model",target=/model,readonly `
+  -e VASCULAR_AGE_MODEL_DIR=/model `
+  vascular-age-ml-service:0.1.0
+```
+
+The mounted model directory must contain:
+
+```text
+model.keras
+preprocessing.json
+```
+
+The model artifact remains outside the Docker image and is supplied at runtime through a read-only bind mount.
+
+Check that the containerized API is running:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:8000/health
+```
+
+A prediction request can then be sent to the containerized service:
+
+```powershell
+Invoke-RestMethod `
+  -Method Post `
+  -Uri http://127.0.0.1:8000/predict `
+  -ContentType "application/json" `
+  -InFile .\request.json
+```
+
+Stop the container with:
+
+```powershell
+docker stop vascular-age-api
+```
+
 ## Prediction Request
 
 The `/predict` endpoint expects JSON containing a waveform:
@@ -159,6 +212,12 @@ Run the automated test suite with:
 python -m pytest -v
 ```
 
+Run the test suite with statement and branch coverage:
+
+```powershell
+python -m pytest --cov=vascular_age --cov-branch --cov-report=term-missing --cov-fail-under=90 -v
+```
+
 The tests cover:
 
 - age-input validation,
@@ -166,9 +225,27 @@ The tests cover:
 - valid and invalid prediction requests,
 - fixed-length waveform validation,
 - inference output handling,
+- model-asset loading,
+- unsupported checkpoint rejection,
 - and predicted-class selection.
 
-API tests use controlled mock predictions so they do not depend on a model file stored on one specific computer. Inference logic is tested separately with a lightweight fake model.
+API tests use controlled mock predictions so they do not depend on a model file stored on one specific computer. Inference logic is tested separately with lightweight model substitutes and model-loading tests.
+
+## Continuous Integration
+
+GitHub Actions automatically:
+
+- checks out the repository,
+- sets up Python,
+- installs the project and development dependencies,
+- runs the automated test suite,
+- measures statement and branch coverage,
+- requires at least 90% test coverage,
+- builds the Docker image,
+- starts a container from that image,
+- and verifies the `/health` endpoint.
+
+This provides automated checks for both the Python application and the containerized runtime after each push.
 
 ## Model Artifact
 
@@ -176,7 +253,9 @@ The trained checkpoint is kept separate from this source-code repository.
 
 At runtime, the application loads `model.keras` and `preprocessing.json` from the directory specified by `VASCULAR_AGE_MODEL_DIR`.
 
-This avoids embedding machine-specific paths or generated model artifacts in the application code.
+When Docker is used, the model directory can be supplied to the container through a read-only bind mount.
+
+This avoids embedding machine-specific paths or generated model artifacts in the application code or Docker image.
 
 ## Related Research Code
 
@@ -186,6 +265,8 @@ https://github.com/KianaAbrisham/ppg-vascular-age-benchmark
 
 That repository contains the model-training, evaluation, preprocessing, checkpoint, and prediction workflows used to produce compatible model artifacts.
 
+The software-serving workflow has also been verified locally using an MLP demo checkpoint produced by that repository and a 512-sample artificial PPG waveform.
+
 ## Limitations
 
 The current service supports the MLP checkpoint path only.
@@ -193,6 +274,8 @@ The current service supports the MLP checkpoint path only.
 The demo model used for software verification was trained on artificial data and must not be interpreted as evidence of clinical validity or research-level predictive performance.
 
 The current output is one of six fixed age categories rather than a continuous biological or vascular-age measurement.
+
+The saved demo checkpoint is used to verify software integration and model serving, not to establish predictive accuracy on patient or wearable data.
 
 ## Development Status
 
@@ -206,4 +289,8 @@ The current implementation includes:
 - structured JSON responses,
 - controlled HTTP error handling,
 - automated API and inference tests,
-- and local end-to-end API verification.
+- statement and branch coverage checks,
+- Docker image creation,
+- runtime model mounting through a read-only bind mount,
+- CI-based Docker build and container health verification,
+- and local end-to-end prediction with a saved Keras checkpoint inside the Dockerized service.
