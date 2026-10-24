@@ -1,0 +1,11 @@
+.git
+.github
+.venv
+.pytest_cache
+.coverage
+__pycache__
+*.pyc
+tests
+notebooks
+data
+models
