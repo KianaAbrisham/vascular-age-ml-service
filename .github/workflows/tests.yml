@@ -28,3 +28,6 @@ jobs:
 
       - name: Run tests with coverage
         run: python -m pytest --cov=vascular_age --cov-branch --cov-report=term-missing --cov-fail-under=90 -v
+
+      - name: Build Docker image
+        run: docker build -t vascular-age-ml-service:ci .
